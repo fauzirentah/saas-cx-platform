@@ -1,0 +1,33 @@
+{
+  "name": "saas-cx-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean": "turbo clean",
+    "db:generate": "turbo db:generate",
+    "db:push": "turbo db:push"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^2.3.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10"
+  },
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=18.17.0",
+    "npm": ">=10.0.0"
+  }
+}

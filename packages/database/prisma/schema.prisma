@@ -1,0 +1,203 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // NextAuth.js fields
+  accounts Account[]
+  sessions Session[]
+
+  // Business logic fields
+  role         UserRole @default(USER)
+  onboardingCompleted Boolean @default(false)
+
+  // Customer Experience related fields
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+
+  // Relations
+  assignedTickets Ticket[] @relation("TicketAssignee")
+
+  // Audit trail
+  lastLoginAt DateTime?
+  isActive    Boolean  @default(true)
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Business Models for CX Platform
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  website     String?
+  industry    String?
+  size        OrganizationSize?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users       User[]
+  customers   Customer[]
+  tickets     Ticket[]
+
+  // Settings
+  settings    Json?
+
+  @@map("organizations")
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+  email          String
+  name           String?
+  phone          String?
+  avatar         String?
+
+  // Organization relation
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  // Customer details
+  status         CustomerStatus @default(ACTIVE)
+  tier           CustomerTier   @default(STANDARD)
+  tags           String[]
+  notes          String?
+
+  // Timestamps
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastContactAt  DateTime?
+
+  // Relations
+  tickets        Ticket[]
+
+  @@unique([email, organizationId])
+  @@map("customers")
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  status      TicketStatus @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String?
+  tags        String[]
+
+  // Relations
+  customer      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId    String
+  assignee      User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  assigneeId    String?
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  resolvedAt    DateTime?
+  dueAt         DateTime?
+
+  @@map("tickets")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum OrganizationSize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  CHURNED
+  PROSPECT
+}
+
+enum CustomerTier {
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}

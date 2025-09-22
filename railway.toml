@@ -1,0 +1,21 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npm run build --workspace=@saas-cx/api"
+
+[deploy]
+startCommand = "npm start --workspace=@saas-cx/api"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+
+[environments.production]
+variables = [
+  "NODE_ENV=production",
+  "PORT=3001"
+]
+
+[environments.production.plugins.postgresql]
+enabled = true
+
+[[environments.production.services]]
+name = "saas-cx-api"
