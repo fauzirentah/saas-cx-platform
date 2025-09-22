@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { healthRouter } from './routes/health'
+import { databaseRouter } from './routes/database'
 
 dotenv.config()
 
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // Routes
 app.use('/api/health', healthRouter)
+app.use('/api/database', databaseRouter)
 
 // Root endpoint - Hello World
 app.get('/', (req, res) => {
@@ -39,6 +41,8 @@ app.get('/', (req, res) => {
     },
     endpoints: {
       health: '/api/health',
+      database: '/api/database/test',
+      seed: '/api/database/seed',
       docs: '/api/docs (coming soon)',
       auth: '/api/auth (coming soon)'
     }
