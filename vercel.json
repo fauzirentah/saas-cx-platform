@@ -1,36 +1,14 @@
 {
   "version": 2,
-  "builds": [
+  "buildCommand": "cd apps/web && npm run build",
+  "devCommand": "cd apps/web && npm run dev",
+  "installCommand": "npm install",
+  "outputDirectory": "apps/web/.next",
+  "framework": "nextjs",
+  "rewrites": [
     {
-      "src": "apps/web/package.json",
-      "use": "@vercel/next",
-      "config": {
-        "projectSettings": {
-          "framework": "nextjs"
-        }
-      }
+      "source": "/api/(.*)",
+      "destination": "https://your-railway-backend.railway.app/api/$1"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://your-railway-backend.railway.app/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "apps/web/$1"
-    }
-  ],
-  "env": {
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "DATABASE_URL": "@database_url",
-    "GOOGLE_CLIENT_ID": "@google_client_id",
-    "GOOGLE_CLIENT_SECRET": "@google_client_secret"
-  },
-  "build": {
-    "env": {
-      "NEXT_TELEMETRY_DISABLED": "1"
-    }
-  }
+  ]
 }
