@@ -1,4 +1,10 @@
+'use client'
+
+import { useSession, signIn, signOut } from 'next-auth/react'
+import { Button } from '@saas-cx/ui'
+
 export default function Home() {
+  const { data: session, status } = useSession()
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-16">
@@ -61,6 +67,59 @@ export default function Home() {
                 <p className="text-gray-600 dark:text-gray-300">• Node.js 18.17+</p>
               </div>
             </div>
+          </div>
+
+          {/* Authentication Section */}
+          <div className="mt-12 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Authentication Status
+            </h2>
+
+            {status === 'loading' ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600 dark:text-gray-300">Loading...</span>
+              </div>
+            ) : session ? (
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  {session.user?.image && (
+                    <img
+                      src={session.user.image}
+                      alt="Profile"
+                      className="w-12 h-12 rounded-full"
+                    />
+                  )}
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Welcome, {session.user?.name}!
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      {session.user?.email}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => signOut()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-gray-600 dark:text-gray-300">
+                  Sign in to access your customer experience dashboard
+                </p>
+                <Button
+                  onClick={() => signIn()}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Sign In with Google
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="mt-8">
